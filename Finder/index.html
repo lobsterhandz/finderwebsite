@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <title>Profile Ranking</title>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl mt-8 font-bold text-center text-white">Profile Ranking</h1>
+        <div class="mt-8 flex">
+            <label for="search" class="sr-only">Search</label>
+            <input type="text" id="search" placeholder="Search profiles" class="border-2 border-gray-300 bg-gray-800 text-white w-full py-2 px-4 rounded">
+            <button id="searchBtn" class="ml-2 inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Search</button>
+        </div>
+        <div id="profiles" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let currentLoadedProfiles = 0;
+            const profilesToLoad = 12;
+
+            function loadMoreProfiles() {
+                $.ajax({
+                    url: "https://your-deta-micros-url/profiles",
+                    data: {
+                        page: currentLoadedProfiles / profilesToLoad
+                    },
+                    success: function(data) {
+                        for (let i = 0; i < data.length; i++) {
+                            const profile = data[i];
+                            const card = `
+                                <div class="bg-gray-800 rounded-lg overflow-hidden shadow">
+                                    <img src="${profile.image}" alt="${profile.name}" class="w-full h-64 object-cover">
+                                    <div class="p-4">
+                                        <h2 class="text-2xl font-bold"><a href="${profile.url}" target="_blank" class="text-blue-500 hover:text-blue-600">${profile.name}</a></h2>
+                                        <div class="mt-2">
+                                            <span class="text-gray-500">Likes: ${profile.likes} <i class="fas fa-heart"></i></span>
+                                            <span class="text-gray-500">Subscribers: ${profile.subscribers} <i class="fas fa-play mr-2"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            $('#profiles').append(card);
+                            currentLoadedProfiles++;
+                        }
+                    }
+                });
+            }
+
+            function searchProfiles() {
+                currentLoadedProfiles = 0;
+                $('#profiles').empty();
+                loadMoreProfiles();
+            }
+
+            function handleScroll() {
+                const scrollTop = $(window).scrollTop();
+                const windowHeight = $(window).height();
+                const documentHeight = $(document).height();
+                const threshold = 200;
+
+                if (scrollTop + windowHeight >= documentHeight - threshold) {
+                    loadMoreProfiles();
+                }
+            }
+
+            loadMoreProfiles();
+
+                        $("#searchBtn").click(searchProfiles);
+
+            $(window).scroll(handleScroll);
+        });
+    </script>
+</body>
+
+</html>
+
+
